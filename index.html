@@ -11,6 +11,34 @@
 </head>
 <body>
 
+
+
+    <h1>WebView LocalStorage Example</h1>
+    <input type="text" id="inputField" placeholder="Введите текст">
+    <button onclick="saveData()">Сохранить</button>
+    <button onclick="loadData()">Загрузить</button>
+    <p id="output"></p>
+
+    <script>
+        function saveData() {
+            const inputField = document.getElementById('inputField');
+            localStorage.setItem('myData', inputField.value);
+            alert('Данные сохранены!');
+        }
+
+        function loadData() {
+            const output = document.getElementById('output');
+            const data = localStorage.getItem('myData');
+            if (data) {
+                output.textContent = 'Сохраненные данные: ' + data;
+            } else {
+                output.textContent = 'Нет сохраненных данных';
+            }
+        }
+    </script>
+
+	
+
 <div id="qqqq"></div>
 
     <script>
