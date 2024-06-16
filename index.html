@@ -7,8 +7,25 @@
     <style>
         /* Ваши стили */
     </style>
+	    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
+
+<div id="qqqq"></div>
+
+    <script>
+        $(document).ready(function() {
+            function updateNumber() {
+                const randomNumber = Math.floor(Math.random() * 100); // Генерируем случайное число от 0 до 99
+                $('#qqqq').text(randomNumber); // Обновляем содержимое div
+            }
+
+            updateNumber(); // Обновляем сразу при загрузке страницы
+
+            setInterval(updateNumber, 1000); // Обновляем каждую секунду
+        });
+    </script>
+	
     <div class="container">
         <h1>Добро пожаловать на тестовую страницу!</h1>
     </div>
@@ -27,6 +44,12 @@ $("#telegram-discussion-fgfdtydse-4-1").ready( function() {
 	}, 100);
 });
 </script>
+
+	<br>
+	<br>
+	<br>
+	<br>
+	<br>
     
 </body>
 </html>
