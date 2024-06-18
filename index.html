@@ -13,6 +13,134 @@
 
 
 
+
+
+
+
+	
+
+    <script type="text/javascript" src="https://unpkg.com/jsnes/dist/jsnes.min.js"></script>
+    <style>
+        #nes-canvas {
+            width: 100%;
+            max-width: 512px;
+            height: auto;
+            border: 1px solid black;
+        }
+        .button {
+            width: 50px;
+            height: 50px;
+            background-color: gray;
+            border-radius: 50%;
+            display: inline-block;
+            margin: 5px;
+            text-align: center;
+            line-height: 50px;
+            font-size: 18px;
+            color: white;
+            user-select: none;
+        }
+        #controls {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+    </style>
+
+
+    <h1>jsNES Emulator with Touch Controls</h1>
+    <canvas id="nes-canvas" width="256" height="240"></canvas>
+    <div id="controls">
+        <div class="button" data-key="up">▲</div>
+        <div class="button" data-key="left">◀</div>
+        <div class="button" data-key="down">▼</div>
+        <div class="button" data-key="right">▶</div>
+        <div class="button" data-key="a">A</div>
+        <div class="button" data-key="b">B</div>
+        <div class="button" data-key="start">Start</div>
+        <div class="button" data-key="select">Select</div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const canvas = document.getElementById('nes-canvas');
+            const ctx = canvas.getContext('2d', { willReadFrequently: true });
+
+            const nes = new jsnes.NES({
+                onFrame: function(framebuffer_24) {
+                    const imageData = ctx.createImageData(256, 240);
+                    for (let i = 0; i < framebuffer_24.length; i++) {
+                        const pixelIndex = i * 4;
+                        imageData.data[pixelIndex] = framebuffer_24[i] & 0xFF; // Red
+                        imageData.data[pixelIndex + 1] = (framebuffer_24[i] >> 8) & 0xFF; // Green
+                        imageData.data[pixelIndex + 2] = (framebuffer_24[i] >> 16) & 0xFF; // Blue
+                        imageData.data[pixelIndex + 3] = 0xFF; // Alpha
+                    }
+                    ctx.putImageData(imageData, 0, 0);
+                    ctx.drawImage(canvas, 0, 0, canvas.width, canvas.height); // Масштабируем изображение
+                },
+                onAudioSample: function(l, r) {
+                    // Обработка аудио (необязательно)
+                }
+            });
+
+            // Загрузка ROM-файла Mario.nes
+            fetch('Mario.nes')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.arrayBuffer();
+                })
+                .then(buffer => {
+                    const byteArray = new Uint8Array(buffer);
+                    const binaryString = byteArray.reduce((data, byte) => data + String.fromCharCode(byte), '');
+                    nes.loadROM(binaryString);
+                    requestAnimationFrame(onAnimationFrame);
+                })
+                .catch(err => console.error('Ошибка загрузки ROM:', err));
+
+            const keyMap = {
+                'up': jsnes.Controller.BUTTON_UP,
+                'down': jsnes.Controller.BUTTON_DOWN,
+                'left': jsnes.Controller.BUTTON_LEFT,
+                'right': jsnes.Controller.BUTTON_RIGHT,
+                'a': jsnes.Controller.BUTTON_A,
+                'b': jsnes.Controller.BUTTON_B,
+                'start': jsnes.Controller.BUTTON_START,
+                'select': jsnes.Controller.BUTTON_SELECT
+            };
+
+            document.querySelectorAll('.button').forEach(button => {
+                button.addEventListener('touchstart', (event) => {
+                    const key = event.target.getAttribute('data-key');
+                    nes.buttonDown(1, keyMap[key]);
+                });
+                button.addEventListener('touchend', (event) => {
+                    const key = event.target.getAttribute('data-key');
+                    nes.buttonUp(1, keyMap[key]);
+                });
+            });
+
+            function onAnimationFrame() {
+                nes.frame();
+                requestAnimationFrame(onAnimationFrame);
+            }
+        });
+    </script>
+
+
+	
+
+
+
+
+
+
+
+
+
+	
+
     <h1>WebView LocalStorage Example</h1>
     <input type="text" id="inputField" placeholder="Введите текст">
     <button onclick="saveData()">Сохранить</button>
