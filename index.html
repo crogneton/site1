@@ -18,8 +18,7 @@
 
 
 	
-
-    <script type="text/javascript" src="https://unpkg.com/jsnes/dist/jsnes.min.js"></script>
+ <script type="text/javascript" src="https://unpkg.com/jsnes/dist/jsnes.min.js"></script>
     <style>
         #nes-canvas {
             width: 100%;
@@ -46,8 +45,8 @@
             flex-wrap: wrap;
         }
     </style>
-
-
+</head>
+<body>
     <h1>jsNES Emulator with Touch Controls</h1>
     <canvas id="nes-canvas" width="256" height="240"></canvas>
     <div id="controls">
@@ -61,9 +60,52 @@
         <div class="button" data-key="select">Select</div>
     </div>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             const canvas = document.getElementById('nes-canvas');
             const ctx = canvas.getContext('2d', { willReadFrequently: true });
+            let audioContext;
+            let audioWorkletNode;
+
+            async function initAudio() {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                try {
+                    const blob = new Blob([`
+                        class NESAudioProcessor extends AudioWorkletProcessor {
+                            constructor() {
+                                super();
+                                this.lBuffer = new Float32Array(128);
+                                this.rBuffer = new Float32Array(128);
+                                this.port.onmessage = (event) => {
+                                    const { l, r } = event.data;
+                                    this.lBuffer.set(l);
+                                    this.rBuffer.set(r);
+                                };
+                            }
+
+                            process(inputs, outputs, parameters) {
+                                const output = outputs[0];
+                                const outputL = output[0];
+                                const outputR = output[1];
+
+                                for (let i = 0; i < outputL.length; i++) {
+                                    outputL[i] = this.lBuffer[i] || 0;
+                                    outputR[i] = this.rBuffer[i] || 0;
+                                }
+
+                                return true;
+                            }
+                        }
+
+                        registerProcessor('nes-audio-processor', NESAudioProcessor);
+                    `], { type: 'application/javascript' });
+                    const url = URL.createObjectURL(blob);
+                    await audioContext.audioWorklet.addModule(url);
+                    audioWorkletNode = new AudioWorkletNode(audioContext, 'nes-audio-processor');
+                    audioWorkletNode.connect(audioContext.destination);
+                } catch (error) {
+                    console.error('Ошибка загрузки модуля AudioWorklet:', error);
+                }
+            }
 
             const nes = new jsnes.NES({
                 onFrame: function(framebuffer_24) {
@@ -79,7 +121,9 @@
                     ctx.drawImage(canvas, 0, 0, canvas.width, canvas.height); // Масштабируем изображение
                 },
                 onAudioSample: function(l, r) {
-                    // Обработка аудио (необязательно)
+                    if (audioWorkletNode) {
+                        audioWorkletNode.port.postMessage({ l, r });
+                    }
                 }
             });
 
@@ -110,8 +154,26 @@
                 'select': jsnes.Controller.BUTTON_SELECT
             };
 
+            const keyboardMap = {
+                'ArrowUp': 'up',
+                'ArrowDown': 'down',
+                'ArrowLeft': 'left',
+                'ArrowRight': 'right',
+                'KeyW': 'up',
+                'KeyA': 'left',
+                'KeyS': 'down',
+                'KeyD': 'right',
+                'Space': 'a',
+                'ShiftLeft': 'b',
+                'Enter': 'start',
+                'Backspace': 'select'
+            };
+
             document.querySelectorAll('.button').forEach(button => {
-                button.addEventListener('touchstart', (event) => {
+                button.addEventListener('touchstart', async (event) => {
+                    if (!audioContext) {
+                        await initAudio();
+                    }
                     const key = event.target.getAttribute('data-key');
                     nes.buttonDown(1, keyMap[key]);
                 });
@@ -119,6 +181,36 @@
                     const key = event.target.getAttribute('data-key');
                     nes.buttonUp(1, keyMap[key]);
                 });
+            });
+
+            document.addEventListener('keydown', async (event) => {
+                if (!audioContext) {
+                    await initAudio();
+                }
+                const key = keyboardMap[event.code];
+                if (key) {
+                    nes.buttonDown(1, keyMap[key]);
+                }
+            });
+
+            document.addEventListener('keyup', (event) => {
+                const key = keyboardMap[event.code];
+                if (key) {
+                    nes.buttonUp(1, keyMap[key]);
+                }
+            });
+
+            // Обработчики для активации аудиоконтекста
+            document.documentElement.addEventListener('mousedown', () => {
+                if (audioContext && audioContext.state !== 'running') {
+                    audioContext.resume();
+                }
+            });
+
+            document.documentElement.addEventListener('keydown', () => {
+                if (audioContext && audioContext.state !== 'running') {
+                    audioContext.resume();
+                }
             });
 
             function onAnimationFrame() {
