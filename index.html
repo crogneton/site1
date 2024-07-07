@@ -8,8 +8,68 @@
         /* Ваши стили */
     </style>
 	    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+	<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 </head>
 <body>
+
+
+
+
+
+
+<input id="partnerPeer">
+<div id="myPeer"></div>
+<div id="myPeer2"></div>
+<button onclick="connect()">Соединиться</button>
+<button onclick="connect2()">Соединиться2</button>
+<script>
+var peer_arr = [];
+var id = "erdenal-erdenal-erdenal-erdenal-erdenal-12345";
+var id2 = "22222222222-" + (Math.floor(Math.random() * 100000000000) + 1) + "-22222222222222";
+var peer = new Peer(id);
+var peer2 = new Peer(id2);
+var chatlist = [];
+
+peer.on('open', function(peerID){
+	$('#myPeer').html(peerID);
+});
+peer2.on('open', function(peerID){
+	$('#myPeer2').html(peerID);
+});
+
+//входящее соединение
+peer.on('connection', function(connect){
+	conn = connect;
+	console.log("подключился: "+connect['peer']);
+	console.log(connect);
+	peer_arr.push(conn);
+});
+peer2.on('connection', function(connect){
+	conn = connect;
+	console.log("подключился: "+connect['peer']);
+	console.log(connect);
+	peer_arr.push(conn);
+});
+
+//исходящее соединение
+function connect() { 
+	conn = peer.connect($('#partnerPeer').val());
+}
+//исходящее соединение
+function connect2() { 
+	conn = peer2.connect($('#partnerPeer').val());
+}
+</script>
+
+
+
+
+
+
+
+
+
+	
 
 
 <a href="http://gorodok.site" target="_blank">Перейти на сайт gorodok.site</a>
