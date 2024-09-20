@@ -13,6 +13,29 @@
 <body>
 
 
+
+<button id="fullscreenBtn">Войти в полноэкранный режим</button>
+
+    <script>
+        const button = document.getElementById('fullscreenBtn');
+
+        button.addEventListener('click', () => {
+            // Проверяем, поддерживает ли браузер полноэкранный режим
+            if (document.documentElement.requestFullscreen) {
+                document.documentElement.requestFullscreen();
+            } else if (document.documentElement.mozRequestFullScreen) { // Firefox
+                document.documentElement.mozRequestFullScreen();
+            } else if (document.documentElement.webkitRequestFullscreen) { // Chrome, Safari и Opera
+                document.documentElement.webkitRequestFullscreen();
+            } else if (document.documentElement.msRequestFullscreen) { // IE/Edge
+                document.documentElement.msRequestFullscreen();
+            }
+        });
+    </script>
+
+
+	
+
 <script>
 // Получаем текущий URL
 const url = window.location.href;
