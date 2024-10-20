@@ -12,6 +12,46 @@
 </head>
 <body>
 
+
+
+
+
+    <h1>Информация пользователя</h1>
+    <div id="user-info"></div>
+
+    <script>
+        function getQueryParams() {
+            const params = {};
+            const queryString = window.location.search.substring(1);
+            const regex = /([^&=]+)=([^&]*)/g;
+            let m;
+
+            while (m = regex.exec(queryString)) {
+                params[decodeURIComponent(m[1])] = decodeURIComponent(m[2]);
+            }
+            return params;
+        }
+
+        const params = getQueryParams();
+
+        if (params.id && params.username && params.avatar) {
+            const userInfo = `
+                <p>ID: ${params.id}</p>
+                <p>Ник: ${params.username}</p>
+                <img src="${params.avatar}" alt="Аватар" />
+            `;
+            document.getElementById('user-info').innerHTML = userInfo;
+        } else {
+            document.getElementById('user-info').innerHTML = '<p>Нет информации о пользователе.</p>';
+        }
+    </script>
+
+
+
+
+
+	
+
 <iframe width="720" height="405" src="https://rutube.ru/play/embed/2b28ced9e49b7204c7cfb5a8eda790a9/" frameBorder="0" allow="clipboard-write; autoplay" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>
 
 <button id="fullscreenBtn">Войти в полноэкранный режим</button>
