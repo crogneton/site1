@@ -20,6 +20,12 @@
     <div id="user-info"></div>
 
     <script>
+
+if (window.Telegram) {
+    window.Telegram.WebApp.expand();
+}
+
+	    
         function getQueryParams() {
             const params = {};
             const queryString = window.location.search.substring(1);
