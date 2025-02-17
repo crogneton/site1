@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZX Spectrum Emulator - Dizzy</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #000;
+            flex-direction: column;
+        }
+        #emulator {
+            width: 100%;
+            max-width: 800px;
+            height: 600px;
+            border: 2px solid #fff;
+            display: none; /* Скрываем эмулятор до клика */
+        }
+        #startButton {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <!-- Кнопка для запуска эмулятора -->
+    <button id="startButton">Запустить эмулятор</button>
+
+    <!-- Контейнер для эмулятора -->
+    <div id="emulator"></div>
+
+    <!-- Подключение JSSpeccy -->
+    <script src="jsspeccy/jsspeccy.js"></script>
+    <script>
+        // Обработчик клика по кнопке
+        document.getElementById('startButton').addEventListener('click', () => {
+            // Показываем эмулятор
+            document.getElementById('emulator').style.display = 'block';
+
+            // Инициализация эмулятора
+            const emulator = JSSpeccy(document.getElementById('emulator'), {
+                autoStart: true, // Автоматически запустить эмулятор
+                openUrl: 'jsspeccy/roms/Dizzy - The Ultimate Cartoon Adventure (1987)(Codemasters)(ru)[128K].z80', // Загрузить игру
+                zoom: 2, // Масштаб
+                machine: 48, // Режим 48K Spectrum
+                keyboardEnabled: true, // Включить клавиатуру
+                uiEnabled: false // Скрыть интерфейс (меню и панель инструментов)
+            });
+
+            // Дополнительные действия после загрузки эмулятора
+            emulator.onReady(() => {
+                console.log('Эмулятор готов!');
+            });
+        });
+    </script>
+</body>
+</html>
